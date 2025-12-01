@@ -24,21 +24,21 @@ private:
 public:
     CircularArray(): pos(50), zeros(false) {}   
     int move(char dir, int value){
-        if(dir == 'R'){
+        if(dir == 'R')
             right(value);
-        } else{
+        else
             left(value);
-        }
         return pos;
     }
+    // call move BEFORE calling crossed
     bool crossed() {return zeros;}
 };
 
 
-int vueltas(int* value){
-    int vueltas = *value / SIZE;
-    *value %= SIZE;
-    return vueltas;
+int laps(int &value){
+    int nlaps = value / SIZE;
+    value %= SIZE;
+    return nlaps;
 }
     
 int password(){
@@ -48,7 +48,7 @@ int password(){
     int value;
     int num_ceros = 0;
     while(fp >> dir >> value){
-        num_ceros += vueltas(&value);
+        num_ceros += laps(value);
         if (dial.move(dir, value) == 0 || dial.crossed())
             num_ceros++;
     }
