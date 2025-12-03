@@ -8,3 +8,5 @@ C/C++ implementation according to the contents of programming subjects of the De
 Day 1. Count shifts in a circular vector
 
 Day 2. Detect pattern repetitions in a string
+
+Day 3. Find the highest two(12)-digit number in a secuence

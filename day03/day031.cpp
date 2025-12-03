@@ -1,5 +1,5 @@
 /*
-    Day 3 (1)
+    Advent of Code 2025 - Day 3 (1)
     Find the highest two-digit number in a secuence.
     Brute force approach.
 */
