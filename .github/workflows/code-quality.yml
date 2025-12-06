@@ -1,0 +1,110 @@
+name: C++ Code Quality Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+
+jobs:
+  cppcheck:
+    name: Static Analysis with Cppcheck
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Cppcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
+        
+    - name: Run Cppcheck with CERT C rules
+      run: |
+        cppcheck --enable=all \
+                 --std=c++17 \
+                 --error-exitcode=1 \
+                 --inline-suppr \
+                 --suppress=missingIncludeSystem \
+                 --suppress=unmatchedSuppression \
+                 --addon=cert \
+                 --addon=threadsafety \
+                 --addon=y2038 \
+                 --template="{file}:{line}:{severity}:{id}:{message}" \
+                 --verbose \
+                 . 2>&1 | tee cppcheck-report.txt || true
+                 
+    - name: Run Cppcheck CERT C++ rules
+      run: |
+        cppcheck --enable=warning,style,performance,portability \
+                 --std=c++17 \
+                 --addon=cert \
+                 --checkers-report=cppcheck-cert-report.txt \
+                 . 2>&1 | tee cppcheck-cert-output.txt || true
+    
+    - name: Check for critical issues
+      run: |
+        if grep -E "(error|warning):" cppcheck-report.txt; then
+          echo "::warning::Code quality issues found. Review the report above."
+        else
+          echo "No critical issues found!"
+        fi
+        
+    - name: Upload Cppcheck report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cppcheck-report
+        path: |
+          cppcheck-report.txt
+          cppcheck-cert-output.txt
+          cppcheck-cert-report.txt
+        retention-days: 30
+
+  compilation-test:
+    name: Compilation Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang g++
+        
+    - name: Compile all cpp files
+      run: |
+        echo "Testing compilation of all .cpp files..."
+        find . -name "*.cpp" -type f | while read file; do
+          echo "Compiling $file..."
+          clang++ -std=c++17 -Wall -Wextra -Wpedantic -fsyntax-only "$file" || echo "::warning file=$file::Compilation warning/error"
+        done
+        
+  code-metrics:
+    name: Code Metrics and Statistics
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Count lines of code
+      run: |
+        echo "## Code Statistics" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Total .cpp files | $(find . -name '*.cpp' -type f | wc -l) |" >> $GITHUB_STEP_SUMMARY
+        echo "| Total lines of code | $(find . -name '*.cpp' -type f -exec cat {} \; | wc -l) |" >> $GITHUB_STEP_SUMMARY
+        echo "| Total characters | $(find . -name '*.cpp' -type f -exec cat {} \; | wc -c) |" >> $GITHUB_STEP_SUMMARY
