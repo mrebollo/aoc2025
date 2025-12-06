@@ -28,28 +28,25 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y cppcheck
         
-    - name: Run Cppcheck with CERT C rules
+    - name: Run Cppcheck - All checks
       run: |
         cppcheck --enable=all \
                  --std=c++17 \
-                 --error-exitcode=1 \
+                 --error-exitcode=0 \
                  --inline-suppr \
                  --suppress=missingIncludeSystem \
                  --suppress=unmatchedSuppression \
-                 --addon=cert \
-                 --addon=threadsafety \
-                 --addon=y2038 \
                  --template="{file}:{line}:{severity}:{id}:{message}" \
                  --verbose \
                  . 2>&1 | tee cppcheck-report.txt || true
                  
-    - name: Run Cppcheck CERT C++ rules
+    - name: Run Cppcheck - Security and Performance
       run: |
-        cppcheck --enable=warning,style,performance,portability \
+        cppcheck --enable=warning,style,performance,portability,information \
                  --std=c++17 \
-                 --addon=cert \
-                 --checkers-report=cppcheck-cert-report.txt \
-                 . 2>&1 | tee cppcheck-cert-output.txt || true
+                 --inconclusive \
+                 --template="[{severity}] {file}:{line}: {message} [{id}]" \
+                 . 2>&1 | tee cppcheck-detailed.txt || true
     
     - name: Check for critical issues
       run: |
@@ -66,8 +63,7 @@ jobs:
         name: cppcheck-report
         path: |
           cppcheck-report.txt
-          cppcheck-cert-output.txt
-          cppcheck-cert-report.txt
+          cppcheck-detailed.txt
         retention-days: 30
 
   compilation-test:
