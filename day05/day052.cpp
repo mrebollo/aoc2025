@@ -1,7 +1,7 @@
 /*
-    Advent of Code 2025 - Day 4 (1)
-    Check if a value belongs to a set of intervals
-    Use ogf an interval tree for efficient querying
+    Advent of Code 2025 - Day 5 (2)
+    Calculate the size of the union of intervals
+    Use of an interval tree for efficient querying
 */
 
 #include <iostream>

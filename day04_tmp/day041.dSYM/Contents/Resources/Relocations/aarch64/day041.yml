@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/mrebollo/devel/aoc2025/day04/day041'
+relocations:     []
+...

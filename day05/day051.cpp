@@ -1,8 +1,10 @@
 /*
-    Advent of Code 2025 - Day 4 (2)
-    Calculate the size of the union of intervals
+    Advent of Code 2025 - Day 5 (1)
+    Check if a value belongs to a set of intervals
     Use ogf an interval tree for efficient querying
 */
+
+
 
 #include <iostream>
 #include <fstream>
@@ -80,7 +82,6 @@ int main() {
     // Read intervals from input
     IntervalTree t;
     long long low, high;
-    char bar;
     string line;
     while (getline(input, line) && !line.empty()){
         size_t dash_pos = line.find('-');
