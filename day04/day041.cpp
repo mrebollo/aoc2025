@@ -1,79 +1,59 @@
 /*
     Advent of Code 2025 - Day 4 (1)
-    Count rolls of paper roeunded by less of 4 rolls
+    Find cells rounded by less that 4 rolls in a grid
 */
 
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <string>
+#include <vector>
+
 using namespace std;
 
-#define DEBUG 0
+#define DEBUG
 
-// Directions for 8 adjacent positions (including diagonals)
-const int dx[] = {-1, -1, -1, 0, 0, 1, 1, 1};
-const int dy[] = {-1, 0, 1, -1, 1, -1, 0, 1};
-
-
-void load(vector<string>& grid) {
-    ifstream input("input.txt");
-    string line;
-    while (getline(input, line)) {
-        if (!line.empty()) {
-            grid.push_back(line);
-        }
-    }
-    input.close();
-}
-    
-
-inline int inside(const vector<string>& grid, int i, int j) {
-    return (i >=0 && i < grid.size() && j >=0 && j < grid[0].size());
-}   
-
-
-int count_around(const vector<string>& grid, int x, int y) {
+int around(const vector<string>& grid, int i, int j) {
     int count = 0;
-    for (int i = 0; i < 8; i++) {
-        int nx = x + dx[i];
-        int ny = y + dy[i];
-        // Check bounds and if there's a roll
-        if (inside(grid, nx, ny) && grid[nx][ny] == '@')
-            count++;
+    int directions[8][2] = {{-1,0}, {1,0}, {0,-1}, {0,1}, {-1,-1}, {-1,1}, {1,-1}, {1,1}}; // up, down, left, right, and diagonals
+    for (auto& dir : directions) {
+        int row = i + dir[0];
+        int col = j + dir[1];
+        if (row >= 0 && row < grid.size() && col >= 0 && col < grid[0].size()) {
+            if (grid[row][col] == '@') 
+                count++;
+        }
     }
     return count;
 }
 
-
-// Count adjacent rolls (@) around position (x, y)
-int accesible( vector<string>& grid) {
-    int total = 0;
-    for(int i = 0; i < (int)grid.size(); i++) {
-        for (int j = 0; j < (int)grid[0].size(); j++) {
-            if (grid[i][j] == '@' && count_around(grid, i, j) < 4){
-                total++;
-            }
-        }
-    }
-    return total;
-}
-
-
-void print( const vector<string>& grid) {
-    for (const auto& row : grid) {
-        cout << row << endl;
-    }
-    cout << endl;
-}
-
-
 int main() {
-    
+    ifstream input("input.txt");
+    // load grid from file
+    string line;
     vector<string> grid;
-    load(grid);
-    int total = accesible(grid);
-    print(grid);
-    cout << "Accessible rolls: " << total << endl;
+    while(getline(input, line))
+        grid.push_back(line);
+    input.close();
+    // count accesible rolls
+    int acesible = 0;
+    for (int i = 0; i < grid.size(); i++) {
+        for (int j = 0; j < grid[i].size(); j++) {
+            if (grid[i][j] == '@' && around(grid, i, j) < 4) {
+                    acesible++;
+#ifdef DEBUG
+                    cout << 'x';
+#endif
+            } 
+#ifdef DEBUG
+            else {
+                cout << grid[i][j];
+            }
+#endif
+        }
+#ifdef DEBUG
+        cout << endl;
+#endif 
+    }   
+    cout << "Total accesible rolls: " << acesible << endl;
     return 0;
 }
