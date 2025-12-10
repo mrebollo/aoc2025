@@ -6,8 +6,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 #include <utility>
 
@@ -18,8 +18,8 @@ using namespace std;
 class Machine{
 private:
     int num_buttons;
-    uint16_t light_panel;
-    vector<uint16_t> button_masks; // bitmask for each button
+    int light_panel;
+    vector<int> button_masks; // bitmask for each button
 
     void insertButton(int mask) {
         button_masks.push_back(mask);
@@ -38,9 +38,20 @@ private:
     void setLightPattern(string token);
 public:
     Machine(): num_buttons(0), light_panel(0) {}
-    uint16_t set(string machine);
+    int set(string machine);
     int findPattern(int pattern) {return 0;}
 };
+
+string print(int mask) {
+    string result;
+    for(int i = 9; i >= 0; i--) {
+        if( mask & (1 << i) )
+            result += '#';
+        else
+            result += '.';
+    }
+    return result;
+}
 
 void Machine::setLightPattern(string token) {
     int last = token.size()-1;
@@ -54,25 +65,27 @@ void Machine::setLightPattern(string token) {
 }
 
 void Machine::addButton(string token){
+    int mask = 0;
+#ifdef DEBUG
+    cout << "Adding " << token;
+#endif
+    //remove parenthhesis
+    token.pop_back();
+    token.erase(token.begin());
     stringstream ss(token);
-    uint16_t mask = 0;
-#ifdef DEBUG
-    cout << "Adding " << token;;
-#endif
-    while(getline(ss, token, ',')) {
-        int bit = stoi(token);
+    int bit;
+    char comma;
+    while(ss >> bit) {
         mask |= (1 << bit);
-#ifdef DEBUG
-    cout << ' ' << mask;
-#endif
+        ss >> comma;
     }   
 #ifdef DEBUG
-    cout << " -> " << mask << endl;
+    cout << " " << print(mask) << endl;
 #endif
     insertButton(mask);
 }
 
-uint16_t Machine::set(string line) {
+int Machine::set(string line) {
     stringstream ss(line);
     light_panel = 0;
     button_masks.clear();
