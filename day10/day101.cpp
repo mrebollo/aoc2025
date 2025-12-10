@@ -103,6 +103,7 @@ int Machine::set(string line) {
     return light_panel;
 }
 
+
 int main(){
     ifstream input("test.txt");
     string line;
